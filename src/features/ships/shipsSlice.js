@@ -31,7 +31,6 @@ export const loadShips = () => async (dispatch) => {
 export const loadShipsInformation = (ships) => async (dispatch) => {
   ships.forEach(async (ship) => {
     const shipInfo = await getShipInfo(ship);
-    console.log("got ship info:", shipInfo);
     dispatch(shipInfoSuccess(shipInfo));
   });
 };

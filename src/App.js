@@ -10,7 +10,7 @@ import {
 } from "./features/ships/shipsSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { percentile } from "./utils/utils";
-import { PortList } from "./molecules/PortList/PortList";
+// import { PortList } from "./molecules/PortList/PortList";
 
 function App() {
   const dispatch = useDispatch();
@@ -34,6 +34,7 @@ function App() {
   useEffect(() => {
     if (shipInformation.length === ships.length) {
       const portsMap = [];
+      let sortedPorts = [];
       let portcallDurations = [];
       // create a map of all port names and vessels
       shipInformation.forEach((vesselInfo) => {
@@ -52,8 +53,6 @@ function App() {
         });
       });
       // transform the above map into a new data structure which has portName and list of vessels
-      let sortedPorts = [];
-      console.log("portsmap length:", portsMap.length);
       for (let portName in portsMap) {
         sortedPorts.push({ portName, vessels: portsMap[portName] });
       }
@@ -73,6 +72,8 @@ function App() {
       // console.log(percentile(90));
       // console.log(portcallDurations);
       setPortInfo(sortedPorts);
+      console.log('sortedPorts', sortedPorts.slice(sortedPorts.length - 5).reverse());
+      console.log('sortedPorts', sortedPorts.slice(0, 5));
       // port call percentiles for 2, 7, 14 days
       const portCallDelayMap = [];
       shipInformation.forEach((vesselInfo) => {
