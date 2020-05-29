@@ -1,8 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from '../features/counter/counterSlice';
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import shipsReducer from "../features/ships/shipsSlice";
 
 export default configureStore({
   reducer: {
-    counter: counterReducer,
+    ships: shipsReducer,
   },
+  middleware: [
+    ...getDefaultMiddleware({
+      serializableCheck: false,
+      immutableCheck: false,
+    }),
+  ],
 });
