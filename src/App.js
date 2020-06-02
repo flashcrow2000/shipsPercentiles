@@ -10,6 +10,9 @@ import {
 } from "./features/ships/shipsSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { percentile } from "./utils/utils";
+import PortList from "./molecules/PortList/PortList";
+import PercentileItem from "./atoms/PercentileItem/PercentileItem";
+import VesselsPercentiles from "./molecules/VesselsPercentiles/VesselsPercentiles";
 // import { PortList } from "./molecules/PortList/PortList";
 
 function App() {
@@ -18,8 +21,9 @@ function App() {
   const shipInformation = useSelector(selectShipInformation);
   const [shipsListLength, setShipsListLength] = useState(0);
   const [portInfo, setPortInfo] = useState([]);
+  const [portCallsPercentiles, setPortCallsPercentiles] = useState([]);
+  const [vesselsPortCallDelayPercentiles, setVesselsPortCallDelayPercentiles] = useState([]);
   // nth percentile: https://www.youtube.com/watch?v=MSQpvuPL2cw; https://www.manageengine.com/network-monitoring/faq/95th-percentile-calculation.html
-  const [portCallDurationList, setPortCallDurationList] = useState([]);
   useEffect(() => {
     dispatch(loadShips());
   }, []);
@@ -43,7 +47,7 @@ function App() {
             portcallDurations.push(
               Math.abs(
                 new Date(portCall.departure) - new Date(portCall.arrival)
-              ) / 1000
+              ) / 1000 / 3600
             );
             if (!portsMap[portCall.port.name]) {
               portsMap[portCall.port.name] = [];
@@ -65,16 +69,33 @@ function App() {
         }
       });
       portcallDurations = portcallDurations.sort((a, b) => a - b);
-      setPortCallDurationList(portcallDurations);
+      console.log(portcallDurations);
+      const percentilesList = portcallDurations.length && [
+        {
+          name: "5th",
+          value: `${percentile(5, portcallDurations)} hrs`
+        },
+        {
+          name: "20th",
+          value: `${percentile(20, portcallDurations)} hrs`
+        },
+        {
+          name: "50th",
+          value: `${percentile(50, portcallDurations)} hrs`
+        },
+        {
+          name: "75th",
+          value: `${percentile(75, portcallDurations)} hrs`
+        },
+        {
+          name: "90th",
+          value: `${percentile(90, portcallDurations)} hrs`
+        }
+      ]
+      setPortCallsPercentiles(percentilesList)
 
-      // console.log(percentile(5));
-      // console.log(percentile(20));
-      // console.log(percentile(90));
-      // console.log(portcallDurations);
       setPortInfo(sortedPorts);
-      console.log('sortedPorts', sortedPorts.slice(sortedPorts.length - 5).reverse());
-      console.log('sortedPorts', sortedPorts.slice(0, 5));
-      // port call percentiles for 2, 7, 14 days
+
       const portCallDelayMap = [];
       shipInformation.forEach((vesselInfo) => {
         portCallDelayMap[vesselInfo.vessel.name] = [];
@@ -151,23 +172,38 @@ function App() {
           vesselInfo.vessel.name
         ].sort((a, b) => a - b);
       });
-      console.log(portCallDelayMap);
+      const vesselsPercentiles = []
       for (let vesselName in portCallDelayMap) {
-        console.log(
-          `${vesselName} percentiles: 5th -> ${percentile(
-            5,
-            portCallDelayMap[vesselName]
-          )}; 50th -> ${percentile(
-            50,
-            portCallDelayMap[vesselName]
-          )}; 80th -> ${percentile(80, portCallDelayMap[vesselName])}`
-        );
+        vesselsPercentiles.push({
+          vessel: vesselName,
+          percentiles: [
+            {
+              name: "5th",
+              value: `${percentile(5, portCallDelayMap[vesselName])} hrs`
+            },
+            {
+              name: "50th",
+              value: `${percentile(50, portCallDelayMap[vesselName])} hrs`
+            },
+            {
+              name: "80th",
+              value: `${percentile(80, portCallDelayMap[vesselName])} hrs`
+            },
+          ]
+        })
       }
+      setVesselsPortCallDelayPercentiles(vesselsPercentiles)
     }
   }, [shipInformation]);
 
   useEffect(() => {}, [shipInformation]);
-  return <div className="App">{/* <PortList portInfo={portInfo} /> */}</div>;
+  return (
+  <div className="App">
+    {portInfo.length && <PortList sortedPorts={portInfo} />}
+    {portCallsPercentiles.length && <PercentileItem percentileName={"Port calls percentiles:"} values={portCallsPercentiles} />}
+    {vesselsPortCallDelayPercentiles.length && <VesselsPercentiles vessels={vesselsPortCallDelayPercentiles} />}
+  </div>
+  );
 }
 
 export default App;

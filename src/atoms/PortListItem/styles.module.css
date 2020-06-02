@@ -1,0 +1,17 @@
+.container {
+  border: 1px solid darkgreen;
+  border-radius: 5px;
+  box-shadow: 2px 2px 2px 0px lightgrey;
+  margin: 5px 0 0 20px;
+  display: flex;
+  justify-content: space-evenly;
+  max-width: 600px;
+}
+
+.text {
+  font-family: Brandon Grotesque;
+  font-size: 32px;
+  font-weight: 500;
+  max-width: 650px;
+  text-align: center;
+}
